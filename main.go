@@ -5,34 +5,46 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 var (
-	enabledFlag bool
+	repeatFlag int
 )
 
 func main() {
 	log.Printf("ucd-v0.1\n")
 
 	homeDir, _ := os.UserHomeDir()
-	log.Printf("Home directory = %v\n", homeDir)
+	curDir, _ := os.Getwd()
 
-	curDir, err := os.Getwd()
-	if err != nil {
-		fmt.Println(err)
+	log.Printf("~: %v\n", homeDir)
+	log.Printf("cwd: %v\n", curDir)
+
+	// flags
+	flag.IntVar(&repeatFlag, "r", 1, "repeat dynamic cd path (for ..)")
+	flag.Parse()
+
+	args := flag.Args()
+	log.Printf("args: %v\n", args)
+
+	if len(args) > 1 {
+		log.Fatalln("Only < 1 arguments can be passed to ucd")
 	}
-
-	log.Printf("Current working directory = %v\n", curDir)
-
-	args := os.Args
-	log.Printf("Arguments: %v\n", args)
 
 	// fmt.Print sends output to stdout, this will be consumed by builtin `cd` command
-	if len(args) == 1 {
-		fmt.Print(homeDir)
+	if len(args) > 0 {
+		fmt.Print(repeat(args[0], repeatFlag))
 	} else {
-		fmt.Print(args[1])
+		fmt.Print(homeDir)
+	}
+}
+
+func repeat(str string, times int) string {
+	s := make([]string, times)
+	for i := range s {
+		s[i] = str
 	}
 
-	flag.Parse()
+	return strings.Join(s, "/")
 }
