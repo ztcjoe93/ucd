@@ -15,6 +15,7 @@ import (
 )
 
 var (
+	clearFlag   bool
 	repeatFlag  int
 	listFlag    bool
 	historyFlag int
@@ -35,6 +36,7 @@ func main() {
 	log.Printf("ucd-v0.1\n")
 
 	// flags
+	flag.BoolVar(&clearFlag, "c", false, "clear history list")
 	flag.BoolVar(&listFlag, "l", false, "MRU list for recently used cd commands")
 	flag.IntVar(&repeatFlag, "r", 1, "repeat dynamic cd path (for ..)")
 	flag.IntVar(&historyFlag, "h", 0, "execute the # path listed from MRU list")
@@ -64,10 +66,17 @@ func main() {
 		pr = PathRecords{Records: map[string]PathRecord{}}
 	}
 
+	if clearFlag {
+		pr = PathRecords{Records: map[string]PathRecord{}}
+		output, _ := json.Marshal(pr)
+		ioutil.WriteFile(cachePath, output, 0644)
+		fmt.Print(".")
+		os.Exit(1)
+	}
+
 	// exit earlier depending on flag passed in
 	if listFlag {
 		listRecords(pr)
-		// dummy data for the time being
 		fmt.Print(".")
 
 		os.Exit(1)
