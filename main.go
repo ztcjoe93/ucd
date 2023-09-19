@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -99,15 +100,35 @@ func main() {
 	cacheFile.Close()
 }
 
+func sortedRecordKeys(pr PathRecords) []string {
+	keys := make([]string, 0, len(pr.Records))
+	for key := range pr.Records {
+		keys = append(keys, key)
+	}
+
+	sort.SliceStable(keys, func(i, j int) bool {
+		return pr.Records[keys[i]].Timestamp > pr.Records[keys[j]].Timestamp
+	})
+
+	return keys
+}
+
 func listRecords(pr PathRecords) {
 	t := table.NewWriter()
 	t.SetOutputMirror(log.Writer())
 	t.AppendHeader(table.Row{"#", "path", "count", "timestamp"})
 
+	keys := sortedRecordKeys(pr)
+
 	index := 1
-	// TODO: sort via timestamp before displaying
-	for path, rec := range pr.Records {
-		t.AppendRow([]interface{}{index, path, rec.Count, rec.Timestamp})
+
+	for _, key := range keys {
+		t.AppendRow([]interface{}{
+			index,
+			key,
+			pr.Records[key].Count,
+			pr.Records[key].Timestamp,
+		})
 		index++
 	}
 
