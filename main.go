@@ -15,12 +15,14 @@ import (
 )
 
 var (
-	clearFlag   bool
-	repeatFlag  int
-	listFlag    bool
-	historyFlag int
-	cachePath   string
-	cacheFile   *os.File
+	clearFlag       bool
+	repeatFlag      int
+	listFlag        bool
+	historyPathFlag int
+	cachePath       string
+	cacheFile       *os.File
+
+	invalidPath bool = false
 )
 
 type PathRecords struct {
@@ -39,7 +41,7 @@ func main() {
 	flag.BoolVar(&clearFlag, "c", false, "clear history list")
 	flag.BoolVar(&listFlag, "l", false, "MRU list for recently used cd commands")
 	flag.IntVar(&repeatFlag, "r", 1, "repeat dynamic cd path (for ..)")
-	flag.IntVar(&historyFlag, "h", 0, "execute the # path listed from MRU list")
+	flag.IntVar(&historyPathFlag, "p", 0, "execute the # path listed from MRU list")
 	flag.Parse()
 
 	args := flag.Args()
@@ -89,9 +91,9 @@ func main() {
 	// fmt.Print sends output to stdout, this will be consumed by builtin `cd` command
 
 	var targetPath string
-	if historyFlag > 0 {
+	if historyPathFlag > 0 {
 		mruRecords := sortedRecordKeys(pr)
-		targetPath = mruRecords[historyFlag-1]
+		targetPath = mruRecords[historyPathFlag-1]
 	} else {
 		if len(args) > 0 {
 			targetPath = repeat(args[0], repeatFlag)
@@ -100,6 +102,18 @@ func main() {
 		}
 	}
 	log.Printf("targetPath: %v\n", targetPath)
+
+	// attempt to chdir into target path
+	err = os.Chdir(targetPath)
+	if err != nil {
+		invalidPath = true
+	}
+	targetPath, _ = os.Getwd()
+
+	if invalidPath {
+		fmt.Print(targetPath)
+		os.Exit(1)
+	}
 
 	rec, ok := pr.Records[targetPath]
 	if ok {
