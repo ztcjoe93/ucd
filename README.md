@@ -14,8 +14,8 @@ function cd() {
 
 ## Usage
 
-| Flag | Type | Default | Description
-| --- | --- | ---
+| Flag | Type | Default | Description |
+| --- | --- | --- |
 | -h | - | - | Display help |
 | -c | bool | false | Clear history list |
 | -l | - | - | Display a Most Recently Used (MRU) list of paths cd-ed |
