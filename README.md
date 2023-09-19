@@ -20,5 +20,5 @@ function cd() {
 | -c | bool | false | Clear history list |
 | -l | - | - | Display a Most Recently Used (MRU) list of paths cd-ed |
 | -p | int | 0 | chdir to the indicated # from MRU list |
-| -r | int | 0 | Repeat given path (solely for dynamic path i.e ..) |
+| -r | int | 1 | Number of repeats for a given path (for dynamic path i.e ..) |
 
