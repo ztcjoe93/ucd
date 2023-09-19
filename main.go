@@ -15,10 +15,11 @@ import (
 )
 
 var (
-	repeatFlag int
-	listFlag   bool
-	cachePath  string
-	cacheFile  *os.File
+	repeatFlag  int
+	listFlag    bool
+	historyFlag int
+	cachePath   string
+	cacheFile   *os.File
 )
 
 type PathRecords struct {
@@ -36,6 +37,7 @@ func main() {
 	// flags
 	flag.BoolVar(&listFlag, "l", false, "MRU list for recently used cd commands")
 	flag.IntVar(&repeatFlag, "r", 1, "repeat dynamic cd path (for ..)")
+	flag.IntVar(&historyFlag, "h", 0, "execute the # path listed from MRU list")
 	flag.Parse()
 
 	args := flag.Args()
@@ -78,11 +80,17 @@ func main() {
 	// fmt.Print sends output to stdout, this will be consumed by builtin `cd` command
 
 	var targetPath string
-	if len(args) > 0 {
-		targetPath = repeat(args[0], repeatFlag)
+	if historyFlag > 0 {
+		mruRecords := sortedRecordKeys(pr)
+		targetPath = mruRecords[historyFlag-1]
 	} else {
-		targetPath = homeDir
+		if len(args) > 0 {
+			targetPath = repeat(args[0], repeatFlag)
+		} else {
+			targetPath = homeDir
+		}
 	}
+	log.Printf("targetPath: %v\n", targetPath)
 
 	rec, ok := pr.Records[targetPath]
 	if ok {
