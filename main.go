@@ -31,6 +31,7 @@ var (
 type Record interface {
 	PathRecord | StashRecord
 	GetTimestamp() string
+	HasCount() bool
 }
 
 type Records struct {
@@ -47,12 +48,20 @@ func (pr PathRecord) GetTimestamp() string {
 	return pr.Timestamp
 }
 
+func (pr PathRecord) HasCount() bool {
+	return true
+}
+
 type StashRecord struct {
 	Timestamp string `json:"ts"`
 }
 
 func (sr StashRecord) GetTimestamp() string {
 	return sr.Timestamp
+}
+
+func (sr StashRecord) HasCount() bool {
+	return false
 }
 
 func main() {
@@ -69,19 +78,13 @@ func main() {
 
 	args := flag.Args()
 	log.Printf("args: %v\n", args)
-	log.Printf("listFlag: %v\n", listFlag)
 
 	homeDir, _ := os.UserHomeDir()
 	curDir, _ := os.Getwd()
 
-	log.Printf("~: %v\n", homeDir)
 	log.Printf("cwd: %v\n", curDir)
 
 	cachePath = homeDir + "/.ucd-cache"
-
-	// cacheFile, _ = os.OpenFile(cachePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	log.Printf("Configuring cachePath to %v\n", cachePath)
-
 	cacheFile, _ := os.Open(cachePath)
 	byteValue, _ := ioutil.ReadAll(cacheFile)
 
@@ -107,14 +110,14 @@ func main() {
 
 	// exit earlier depending on flag passed in
 	if listFlag {
-		r.listRecords()
+		r.listRecords("path")
 		fmt.Print(".")
 
 		os.Exit(1)
 	}
 
 	if listStashFlag {
-		r.listStashRecords()
+		r.listRecords("stash")
 		fmt.Print(".")
 
 		os.Exit(1)
@@ -183,43 +186,38 @@ func sortRecords[v Record](r map[string]v) []string {
 	return keys
 }
 
-func (r Records) listRecords() {
-	t := table.NewWriter()
-	t.SetOutputMirror(log.Writer())
-	t.AppendHeader(table.Row{"#", "path", "count", "timestamp"})
+func (r Records) listRecords(recType string) {
 
-	keys := sortRecords(r.PathRecords)
+	var isPath = true
 
-	index := 1
-
-	for _, key := range keys {
-		t.AppendRow([]interface{}{
-			index,
-			key,
-			r.PathRecords[key].Count,
-			r.PathRecords[key].Timestamp,
-		})
-		index++
+	if recType == "stash" {
+		isPath = false
 	}
 
-	t.Render()
-}
-
-func (r Records) listStashRecords() {
 	t := table.NewWriter()
 	t.SetOutputMirror(log.Writer())
-	t.AppendHeader(table.Row{"#", "path", "timestamp"})
 
-	keys := sortRecords(r.StashRecords)
+	if isPath {
+		t.AppendHeader(table.Row{"#", "path", "count", "timestamp"})
+	} else {
+		t.AppendHeader(table.Row{"#", "path", "timestamp"})
+	}
+
+	var keys []string
+
+	if isPath {
+		keys = sortRecords(r.PathRecords)
+	} else {
+		keys = sortRecords(r.StashRecords)
+	}
 
 	index := 1
-
 	for _, key := range keys {
-		t.AppendRow([]interface{}{
-			index,
-			key,
-			r.StashRecords[key].Timestamp,
-		})
+		if isPath {
+			t.AppendRow([]interface{}{index, key, r.PathRecords[key].Count, r.PathRecords[key].Timestamp})
+		} else {
+			t.AppendRow([]interface{}{index, key, r.StashRecords[key].Timestamp})
+		}
 		index++
 	}
 
