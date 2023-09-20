@@ -16,6 +16,7 @@ import (
 )
 
 var (
+	helpFlag        bool
 	clearFlag       bool
 	repeatFlag      int
 	listFlag        bool
@@ -68,6 +69,7 @@ func main() {
 	log.Printf("ucd-v0.1\n")
 
 	// flags
+	flag.BoolVar(&helpFlag, "h", false, "display help list")
 	flag.BoolVar(&clearFlag, "c", false, "clear history list")
 	flag.BoolVar(&listFlag, "l", false, "MRU list for recently used cd commands")
 	flag.BoolVar(&listStashFlag, "ls", false, "list stashed cd commands")
@@ -83,6 +85,11 @@ func main() {
 	curDir, _ := os.Getwd()
 
 	log.Printf("cwd: %v\n", curDir)
+
+	if helpFlag {
+		fmt.Print(".")
+		os.Exit(1)
+	}
 
 	cachePath = homeDir + "/.ucd-cache"
 	cacheFile, _ := os.Open(cachePath)
