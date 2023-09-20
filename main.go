@@ -18,7 +18,9 @@ var (
 	clearFlag       bool
 	repeatFlag      int
 	listFlag        bool
+	listStashFlag   bool
 	historyPathFlag int
+	stashFlag       bool
 	cachePath       string
 	cacheFile       *os.File
 
@@ -26,11 +28,16 @@ var (
 )
 
 type PathRecords struct {
-	Records map[string]PathRecord `json:"paths"`
+	Records      map[string]PathRecord  `json:"paths"`
+	StashRecords map[string]StashRecord `json:"stash"`
 }
 
 type PathRecord struct {
 	Count     int    `json:"count"`
+	Timestamp string `json:"ts"`
+}
+
+type StashRecord struct {
 	Timestamp string `json:"ts"`
 }
 
@@ -40,6 +47,8 @@ func main() {
 	// flags
 	flag.BoolVar(&clearFlag, "c", false, "clear history list")
 	flag.BoolVar(&listFlag, "l", false, "MRU list for recently used cd commands")
+	flag.BoolVar(&listStashFlag, "ls", false, "list stashed cd commands")
+	flag.BoolVar(&stashFlag, "s", false, "stash cd path into a separate list")
 	flag.IntVar(&repeatFlag, "r", 1, "repeat dynamic cd path (for ..)")
 	flag.IntVar(&historyPathFlag, "p", 0, "execute the # path listed from MRU list")
 	flag.Parse()
@@ -65,11 +74,17 @@ func main() {
 	var pr PathRecords
 	err := json.Unmarshal(byteValue, &pr)
 	if err != nil {
-		pr = PathRecords{Records: map[string]PathRecord{}}
+		pr = PathRecords{
+			Records:      map[string]PathRecord{},
+			StashRecords: map[string]StashRecord{},
+		}
 	}
 
 	if clearFlag {
-		pr = PathRecords{Records: map[string]PathRecord{}}
+		pr = PathRecords{
+			Records:      map[string]PathRecord{},
+			StashRecords: map[string]StashRecord{},
+		}
 		output, _ := json.Marshal(pr)
 		ioutil.WriteFile(cachePath, output, 0644)
 		fmt.Print(".")
@@ -79,6 +94,13 @@ func main() {
 	// exit earlier depending on flag passed in
 	if listFlag {
 		listRecords(pr)
+		fmt.Print(".")
+
+		os.Exit(1)
+	}
+
+	if listStashFlag {
+		listStashRecords(pr)
 		fmt.Print(".")
 
 		os.Exit(1)
@@ -125,6 +147,9 @@ func main() {
 	}
 
 	fmt.Print(targetPath)
+	if stashFlag {
+		pr.StashRecords[targetPath] = StashRecord{Timestamp: timeNow()}
+	}
 
 	output, _ := json.Marshal(pr)
 	ioutil.WriteFile(cachePath, output, 0644)
@@ -139,6 +164,19 @@ func sortedRecordKeys(pr PathRecords) []string {
 
 	sort.SliceStable(keys, func(i, j int) bool {
 		return pr.Records[keys[i]].Timestamp > pr.Records[keys[j]].Timestamp
+	})
+
+	return keys
+}
+
+func sortedStashRecordKeys(pr PathRecords) []string {
+	keys := make([]string, 0, len(pr.StashRecords))
+	for key := range pr.StashRecords {
+		keys = append(keys, key)
+	}
+
+	sort.SliceStable(keys, func(i, j int) bool {
+		return pr.StashRecords[keys[i]].Timestamp > pr.StashRecords[keys[j]].Timestamp
 	})
 
 	return keys
@@ -159,6 +197,27 @@ func listRecords(pr PathRecords) {
 			key,
 			pr.Records[key].Count,
 			pr.Records[key].Timestamp,
+		})
+		index++
+	}
+
+	t.Render()
+}
+
+func listStashRecords(pr PathRecords) {
+	t := table.NewWriter()
+	t.SetOutputMirror(log.Writer())
+	t.AppendHeader(table.Row{"#", "path", "timestamp"})
+
+	keys := sortedStashRecordKeys(pr)
+
+	index := 1
+
+	for _, key := range keys {
+		t.AppendRow([]interface{}{
+			index,
+			key,
+			pr.StashRecords[key].Timestamp,
 		})
 		index++
 	}
