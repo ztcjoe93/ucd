@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"reflect"
 	"sort"
 	"strings"
 	"time"
@@ -27,8 +28,13 @@ var (
 	invalidPath bool = false
 )
 
-type PathRecords struct {
-	Records      map[string]PathRecord  `json:"paths"`
+type Record interface {
+	PathRecord | StashRecord
+	GetTimestamp() string
+}
+
+type Records struct {
+	PathRecords  map[string]PathRecord  `json:"paths"`
 	StashRecords map[string]StashRecord `json:"stash"`
 }
 
@@ -37,8 +43,16 @@ type PathRecord struct {
 	Timestamp string `json:"ts"`
 }
 
+func (pr PathRecord) GetTimestamp() string {
+	return pr.Timestamp
+}
+
 type StashRecord struct {
 	Timestamp string `json:"ts"`
+}
+
+func (sr StashRecord) GetTimestamp() string {
+	return sr.Timestamp
 }
 
 func main() {
@@ -71,21 +85,21 @@ func main() {
 	cacheFile, _ := os.Open(cachePath)
 	byteValue, _ := ioutil.ReadAll(cacheFile)
 
-	var pr PathRecords
-	err := json.Unmarshal(byteValue, &pr)
+	var r Records
+	err := json.Unmarshal(byteValue, &r)
 	if err != nil {
-		pr = PathRecords{
-			Records:      map[string]PathRecord{},
+		r = Records{
+			PathRecords:  map[string]PathRecord{},
 			StashRecords: map[string]StashRecord{},
 		}
 	}
 
 	if clearFlag {
-		pr = PathRecords{
-			Records:      map[string]PathRecord{},
+		r = Records{
+			PathRecords:  map[string]PathRecord{},
 			StashRecords: map[string]StashRecord{},
 		}
-		output, _ := json.Marshal(pr)
+		output, _ := json.Marshal(r)
 		ioutil.WriteFile(cachePath, output, 0644)
 		fmt.Print(".")
 		os.Exit(1)
@@ -93,14 +107,14 @@ func main() {
 
 	// exit earlier depending on flag passed in
 	if listFlag {
-		listRecords(pr)
+		r.listRecords()
 		fmt.Print(".")
 
 		os.Exit(1)
 	}
 
 	if listStashFlag {
-		listStashRecords(pr)
+		r.listStashRecords()
 		fmt.Print(".")
 
 		os.Exit(1)
@@ -114,7 +128,7 @@ func main() {
 
 	var targetPath string
 	if historyPathFlag > 0 {
-		mruRecords := sortedRecordKeys(pr)
+		mruRecords := sortRecords(r.PathRecords)
 		targetPath = mruRecords[historyPathFlag-1]
 	} else {
 		if len(args) > 0 {
@@ -137,57 +151,44 @@ func main() {
 		os.Exit(1)
 	}
 
-	rec, ok := pr.Records[targetPath]
+	rec, ok := r.PathRecords[targetPath]
 	if ok {
 		rec.Count++
 		rec.Timestamp = timeNow()
-		pr.Records[targetPath] = rec
+		r.PathRecords[targetPath] = rec
 	} else {
-		pr.Records[targetPath] = PathRecord{Count: 1, Timestamp: timeNow()}
+		r.PathRecords[targetPath] = PathRecord{Count: 1, Timestamp: timeNow()}
 	}
 
 	fmt.Print(targetPath)
 	if stashFlag {
-		pr.StashRecords[targetPath] = StashRecord{Timestamp: timeNow()}
+		r.StashRecords[targetPath] = StashRecord{Timestamp: timeNow()}
 	}
 
-	output, _ := json.Marshal(pr)
+	output, _ := json.Marshal(r)
 	ioutil.WriteFile(cachePath, output, 0644)
 	cacheFile.Close()
 }
 
-func sortedRecordKeys(pr PathRecords) []string {
-	keys := make([]string, 0, len(pr.Records))
-	for key := range pr.Records {
+func sortRecords[v Record](r map[string]v) []string {
+	keys := make([]string, 0, len(r))
+	for key := range r {
 		keys = append(keys, key)
 	}
 
 	sort.SliceStable(keys, func(i, j int) bool {
-		return pr.Records[keys[i]].Timestamp > pr.Records[keys[j]].Timestamp
+		return r[keys[i]].GetTimestamp() > r[keys[j]].GetTimestamp()
 	})
 
 	return keys
 }
 
-func sortedStashRecordKeys(pr PathRecords) []string {
-	keys := make([]string, 0, len(pr.StashRecords))
-	for key := range pr.StashRecords {
-		keys = append(keys, key)
-	}
-
-	sort.SliceStable(keys, func(i, j int) bool {
-		return pr.StashRecords[keys[i]].Timestamp > pr.StashRecords[keys[j]].Timestamp
-	})
-
-	return keys
-}
-
-func listRecords(pr PathRecords) {
+func (r Records) listRecords() {
 	t := table.NewWriter()
 	t.SetOutputMirror(log.Writer())
 	t.AppendHeader(table.Row{"#", "path", "count", "timestamp"})
 
-	keys := sortedRecordKeys(pr)
+	keys := sortRecords(r.PathRecords)
 
 	index := 1
 
@@ -195,8 +196,8 @@ func listRecords(pr PathRecords) {
 		t.AppendRow([]interface{}{
 			index,
 			key,
-			pr.Records[key].Count,
-			pr.Records[key].Timestamp,
+			r.PathRecords[key].Count,
+			r.PathRecords[key].Timestamp,
 		})
 		index++
 	}
@@ -204,12 +205,12 @@ func listRecords(pr PathRecords) {
 	t.Render()
 }
 
-func listStashRecords(pr PathRecords) {
+func (r Records) listStashRecords() {
 	t := table.NewWriter()
 	t.SetOutputMirror(log.Writer())
 	t.AppendHeader(table.Row{"#", "path", "timestamp"})
 
-	keys := sortedStashRecordKeys(pr)
+	keys := sortRecords(r.StashRecords)
 
 	index := 1
 
@@ -217,7 +218,7 @@ func listStashRecords(pr PathRecords) {
 		t.AppendRow([]interface{}{
 			index,
 			key,
-			pr.StashRecords[key].Timestamp,
+			r.StashRecords[key].Timestamp,
 		})
 		index++
 	}
@@ -236,4 +237,8 @@ func repeat(str string, times int) string {
 
 func timeNow() string {
 	return time.Now().Format("2006-01-02 15:04:05 MST")
+}
+
+func getType(v interface{}) string {
+	return reflect.TypeOf(v).String()
 }
