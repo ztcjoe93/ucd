@@ -17,8 +17,10 @@ function cd() {
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
 | -h | - | - | Display help |
-| -c | bool | false | Clear history list |
+| -c | bool | false | Clear history and stash list |
 | -l | - | - | Display a Most Recently Used (MRU) list of paths cd-ed |
+| -ls | - | - | Display a list of stashed cd commands |
+| -s | bool | false | stash the cd path to a separately tracked list |
 | -p | int | 0 | chdir to the indicated # from MRU list |
 | -r | int | 1 | Number of repeats for a given path (for dynamic path i.e ..) |
 
