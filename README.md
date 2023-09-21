@@ -7,21 +7,20 @@ Append the following to your specific shell [RCfile](https://en.wikipedia.org/wi
 
 Example for .zshrc  
 ```shell
-function cd() {
-    builtin cd $(ucd $@)
-}
+function cd() { builtin cd $(ucd $@) }
 ```
 
 ## Usage
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
-| -h | - | - | Display help |
-| -v | - | - | Display version | 
-| -c | bool | false | Clear history and stash list |
-| -l | - | - | Display a Most Recently Used (MRU) list of paths cd-ed |
-| -ls | - | - | Display a list of stashed cd commands |
-| -s | bool | false | stash the cd path to a separately tracked list |
+| -h | - | - | display help |
+| -v | - | - | display version | 
+| -c | bool | false | clear history and stash list |
+| -d | int | 0 | swap directory at -d parent directories |
+| -l | - | - | display Most Recently Used (MRU) list of paths chdir-ed into |
+| -ls | - | - | display a list of stashed cd commands |
 | -p | int | 0 | chdir to the indicated # from MRU list |
-| -r | int | 1 | Number of repeats for a given path (for dynamic path i.e ..) |
+| -r | int | 1 | no. of times to execute chdir |
+| -s | bool | false | stash the cd path to a separately tracked list |
 
