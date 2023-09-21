@@ -1,4 +1,4 @@
-package ucd
+package main
 
 import (
 	"encoding/json"
@@ -10,6 +10,8 @@ import (
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/ztcjoe93/ucd/records"
 )
 
 var (
@@ -56,19 +58,19 @@ func main() {
 	cacheFile, _ := os.Open(cachePath)
 	byteValue, _ := ioutil.ReadAll(cacheFile)
 
-	var r Records
+	var r records.Records
 	err := json.Unmarshal(byteValue, &r)
 	if err != nil {
-		r = Records{
-			PathRecords:  map[string]PathRecord{},
-			StashRecords: map[string]StashRecord{},
+		r = records.Records{
+			PathRecords:  map[string]records.PathRecord{},
+			StashRecords: map[string]records.StashRecord{},
 		}
 	}
 
 	if clearFlag {
-		r = Records{
-			PathRecords:  map[string]PathRecord{},
-			StashRecords: map[string]StashRecord{},
+		r = records.Records{
+			PathRecords:  map[string]records.PathRecord{},
+			StashRecords: map[string]records.StashRecord{},
 		}
 		output, _ := json.Marshal(r)
 		ioutil.WriteFile(cachePath, output, 0644)
@@ -78,14 +80,14 @@ func main() {
 
 	// exit earlier depending on flag passed in
 	if listFlag {
-		r.listRecords("path")
+		r.ListRecords("path")
 		fmt.Print(".")
 
 		os.Exit(1)
 	}
 
 	if listStashFlag {
-		r.listRecords("stash")
+		r.ListRecords("stash")
 		fmt.Print(".")
 
 		os.Exit(1)
@@ -99,7 +101,7 @@ func main() {
 
 	var targetPath string
 	if historyPathFlag > 0 {
-		mruRecords := sortRecords(r.PathRecords)
+		mruRecords := records.SortRecords(r.PathRecords)
 		targetPath = mruRecords[historyPathFlag-1]
 	} else {
 		if len(args) > 0 {
@@ -129,12 +131,12 @@ func main() {
 		rec.Timestamp = timeNow()
 		r.PathRecords[targetPath] = rec
 	} else {
-		r.PathRecords[targetPath] = PathRecord{Count: 1, Timestamp: timeNow()}
+		r.PathRecords[targetPath] = records.PathRecord{Count: 1, Timestamp: timeNow()}
 	}
 
 	fmt.Print(targetPath)
 	if stashFlag {
-		r.StashRecords[targetPath] = StashRecord{Timestamp: timeNow()}
+		r.StashRecords[targetPath] = records.StashRecord{Timestamp: timeNow()}
 	}
 
 	output, _ := json.Marshal(r)

@@ -1,4 +1,4 @@
-package main
+package records
 
 import (
 	"log"
@@ -43,7 +43,7 @@ func (sr StashRecord) HasCount() bool {
 	return false
 }
 
-func (r Records) listRecords(recType string) {
+func (r Records) ListRecords(recType string) {
 
 	var isPath = true
 
@@ -63,9 +63,9 @@ func (r Records) listRecords(recType string) {
 	var keys []string
 
 	if isPath {
-		keys = sortRecords(r.PathRecords)
+		keys = SortRecords(r.PathRecords)
 	} else {
-		keys = sortRecords(r.StashRecords)
+		keys = SortRecords(r.StashRecords)
 	}
 
 	index := 1
@@ -81,7 +81,7 @@ func (r Records) listRecords(recType string) {
 	t.Render()
 }
 
-func sortRecords[v Record](r map[string]v) []string {
+func SortRecords[v Record](r map[string]v) []string {
 	keys := make([]string, 0, len(r))
 	for key := range r {
 		keys = append(keys, key)
