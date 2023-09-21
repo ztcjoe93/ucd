@@ -15,12 +15,12 @@ function cd() { builtin cd $(ucd $@) }
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
 | -h | - | - | display help |
-| -v | - | - | display version | 
+| -v | - | - | display ucd version | 
 | -c | bool | false | clear history and stash list |
 | -d | int | 0 | swap directory at -d parent directories |
 | -l | - | - | display Most Recently Used (MRU) list of paths chdir-ed into |
-| -ls | - | - | display a list of stashed cd commands |
+| -ls | - | - | display list of stashed cd commands |
 | -p | int | 0 | chdir to the indicated # from MRU list |
-| -r | int | 1 | no. of times to execute chdir |
-| -s | bool | false | stash the cd path to a separately tracked list |
+| -n | int | 1 | no. of times to execute chdir |
+| -s | bool | false | stash cd path into a separate list |
 

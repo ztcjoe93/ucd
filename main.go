@@ -17,7 +17,7 @@ var (
 	helpFlag        bool
 	clearFlag       bool
 	dynamicSwapFlag int
-	repeatFlag      int
+	numRepeatFlag   int
 	listFlag        bool
 	listStashFlag   bool
 	historyPathFlag int
@@ -33,15 +33,15 @@ var (
 func main() {
 	log.SetFlags(0)
 	// flags
-	flag.BoolVar(&helpFlag, "h", false, "display help list")
-	flag.BoolVar(&clearFlag, "c", false, "clear history list")
-	flag.BoolVar(&listFlag, "l", false, "MRU list for recently used cd commands")
-	flag.BoolVar(&listStashFlag, "ls", false, "list stashed cd commands")
-	flag.BoolVar(&stashFlag, "s", false, "stash cd path into a separate list")
+	flag.BoolVar(&helpFlag, "h", false, "display help")
 	flag.BoolVar(&versionFlag, "v", false, "display ucd version")
-	flag.IntVar(&repeatFlag, "r", 1, "repeat dynamic cd path (for ..)")
-	flag.IntVar(&historyPathFlag, "p", 0, "execute the # path listed from MRU list")
+	flag.BoolVar(&clearFlag, "c", false, "clear history and stash list")
 	flag.IntVar(&dynamicSwapFlag, "d", 0, "swap out directory to arg after -d parent directories")
+	flag.BoolVar(&listFlag, "l", false, "display Most Recently Used (MRU) list of paths chdir-ed into")
+	flag.BoolVar(&listStashFlag, "ls", false, "display list of stashed cd commands")
+	flag.IntVar(&numRepeatFlag, "n", 1, "no. of times to execute chdir")
+	flag.IntVar(&historyPathFlag, "p", 0, "chdir to the indicated # from the MRU list")
+	flag.BoolVar(&stashFlag, "s", false, "stash cd path into a separate list")
 	flag.Parse()
 
 	args := flag.Args()
@@ -112,7 +112,7 @@ func main() {
 		targetPath = mruRecords[historyPathFlag-1]
 	} else {
 		if len(args) > 0 {
-			targetPath = repeat(args[0], repeatFlag)
+			targetPath = repeat(args[0], numRepeatFlag)
 		} else {
 			targetPath = homeDir
 		}
