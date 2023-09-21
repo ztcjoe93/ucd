@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"reflect"
 	"strings"
 	"time"
 
@@ -17,6 +16,7 @@ import (
 var (
 	helpFlag        bool
 	clearFlag       bool
+	dynamicSwapFlag int
 	repeatFlag      int
 	listFlag        bool
 	listStashFlag   bool
@@ -41,12 +41,14 @@ func main() {
 	flag.BoolVar(&versionFlag, "v", false, "display ucd version")
 	flag.IntVar(&repeatFlag, "r", 1, "repeat dynamic cd path (for ..)")
 	flag.IntVar(&historyPathFlag, "p", 0, "execute the # path listed from MRU list")
+	flag.IntVar(&dynamicSwapFlag, "d", 0, "swap out directory to arg after -d parent directories")
 	flag.Parse()
 
 	args := flag.Args()
 	homeDir, _ := os.UserHomeDir()
 
 	if helpFlag {
+		flag.PrintDefaults()
 		fmt.Print(".")
 		os.Exit(1)
 	}
@@ -103,7 +105,9 @@ func main() {
 	// fmt.Print sends output to stdout, this will be consumed by builtin `cd` command
 
 	var targetPath string
-	if historyPathFlag > 0 {
+	if dynamicSwapFlag > 0 {
+		targetPath = dynamicPathSwap(args[0], dynamicSwapFlag)
+	} else if historyPathFlag > 0 {
 		mruRecords := records.SortRecords(r.PathRecords)
 		targetPath = mruRecords[historyPathFlag-1]
 	} else {
@@ -113,15 +117,8 @@ func main() {
 			targetPath = homeDir
 		}
 	}
-	// log.Printf("targetPath: %v\n", targetPath)
 
-	// attempt to chdir into target path
-	err = os.Chdir(targetPath)
-	if err != nil {
-		invalidPath = true
-	}
-
-	if invalidPath {
+	if isInvalidPath(targetPath) {
 		fmt.Print(targetPath)
 		os.Exit(1)
 	}
@@ -147,6 +144,38 @@ func main() {
 	cacheFile.Close()
 }
 
+func dynamicPathSwap(swapArg string, upCount int) string {
+	paths := make([]string, 0)
+	for i := 0; i < upCount; i++ {
+		wd, _ := os.Getwd()
+		wdArr := strings.Split(wd, "/")
+		paths = prependStrSlice(paths, wdArr[len(wdArr)-1])
+		os.Chdir("..")
+	}
+
+	os.Chdir("..")
+	paths = prependStrSlice(paths, swapArg)
+	targetPath := strings.Join(paths, "/")
+
+	return targetPath
+}
+
+func prependStrSlice(x []string, y string) []string {
+	x = append(x, "")
+	copy(x[1:], x)
+	x[0] = y
+	return x
+}
+
+func isInvalidPath(targetPath string) bool {
+	err := os.Chdir(targetPath)
+	if err != nil {
+		return true
+	}
+
+	return false
+}
+
 func repeat(str string, times int) string {
 	s := make([]string, times)
 	for i := range s {
@@ -158,8 +187,4 @@ func repeat(str string, times int) string {
 
 func timeNow() string {
 	return time.Now().Format("2006-01-02 15:04:05 MST")
-}
-
-func getType(v interface{}) string {
-	return reflect.TypeOf(v).String()
 }
