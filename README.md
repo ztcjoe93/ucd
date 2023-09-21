@@ -17,6 +17,7 @@ function cd() {
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
 | -h | - | - | Display help |
+| -v | - | - | Display version | 
 | -c | bool | false | Clear history and stash list |
 | -l | - | - | Display a Most Recently Used (MRU) list of paths cd-ed |
 | -ls | - | - | Display a list of stashed cd commands |

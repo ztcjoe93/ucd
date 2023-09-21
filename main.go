@@ -22,34 +22,37 @@ var (
 	listStashFlag   bool
 	historyPathFlag int
 	stashFlag       bool
+	versionFlag     bool
 	cachePath       string
 	cacheFile       *os.File
 
-	invalidPath bool = false
+	invalidPath bool   = false
+	version     string = "ucd v0.1"
 )
 
 func main() {
-	log.Printf("ucd-v0.1\n")
-
+	log.SetFlags(0)
 	// flags
 	flag.BoolVar(&helpFlag, "h", false, "display help list")
 	flag.BoolVar(&clearFlag, "c", false, "clear history list")
 	flag.BoolVar(&listFlag, "l", false, "MRU list for recently used cd commands")
 	flag.BoolVar(&listStashFlag, "ls", false, "list stashed cd commands")
 	flag.BoolVar(&stashFlag, "s", false, "stash cd path into a separate list")
+	flag.BoolVar(&versionFlag, "v", false, "display ucd version")
 	flag.IntVar(&repeatFlag, "r", 1, "repeat dynamic cd path (for ..)")
 	flag.IntVar(&historyPathFlag, "p", 0, "execute the # path listed from MRU list")
 	flag.Parse()
 
 	args := flag.Args()
-	// log.Printf("args: %v\n", args)
-
 	homeDir, _ := os.UserHomeDir()
-	// curDir, _ := os.Getwd()
-
-	// log.Printf("cwd: %v\n", curDir)
 
 	if helpFlag {
+		fmt.Print(".")
+		os.Exit(1)
+	}
+
+	if versionFlag {
+		log.Printf("%v\n", version)
 		fmt.Print(".")
 		os.Exit(1)
 	}
