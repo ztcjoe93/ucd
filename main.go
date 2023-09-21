@@ -1,4 +1,4 @@
-package main
+package ucd
 
 import (
 	"encoding/json"
@@ -8,11 +8,8 @@ import (
 	"log"
 	"os"
 	"reflect"
-	"sort"
 	"strings"
 	"time"
-
-	"github.com/jedib0t/go-pretty/table"
 )
 
 var (
@@ -29,42 +26,6 @@ var (
 	invalidPath bool = false
 )
 
-type Record interface {
-	PathRecord | StashRecord
-	GetTimestamp() string
-	HasCount() bool
-}
-
-type Records struct {
-	PathRecords  map[string]PathRecord  `json:"paths"`
-	StashRecords map[string]StashRecord `json:"stash"`
-}
-
-type PathRecord struct {
-	Count     int    `json:"count"`
-	Timestamp string `json:"ts"`
-}
-
-func (pr PathRecord) GetTimestamp() string {
-	return pr.Timestamp
-}
-
-func (pr PathRecord) HasCount() bool {
-	return true
-}
-
-type StashRecord struct {
-	Timestamp string `json:"ts"`
-}
-
-func (sr StashRecord) GetTimestamp() string {
-	return sr.Timestamp
-}
-
-func (sr StashRecord) HasCount() bool {
-	return false
-}
-
 func main() {
 	log.Printf("ucd-v0.1\n")
 
@@ -79,12 +40,12 @@ func main() {
 	flag.Parse()
 
 	args := flag.Args()
-	log.Printf("args: %v\n", args)
+	// log.Printf("args: %v\n", args)
 
 	homeDir, _ := os.UserHomeDir()
-	curDir, _ := os.Getwd()
+	// curDir, _ := os.Getwd()
 
-	log.Printf("cwd: %v\n", curDir)
+	// log.Printf("cwd: %v\n", curDir)
 
 	if helpFlag {
 		fmt.Print(".")
@@ -147,19 +108,20 @@ func main() {
 			targetPath = homeDir
 		}
 	}
-	log.Printf("targetPath: %v\n", targetPath)
+	// log.Printf("targetPath: %v\n", targetPath)
 
 	// attempt to chdir into target path
 	err = os.Chdir(targetPath)
 	if err != nil {
 		invalidPath = true
 	}
-	targetPath, _ = os.Getwd()
 
 	if invalidPath {
 		fmt.Print(targetPath)
 		os.Exit(1)
 	}
+
+	targetPath, _ = os.Getwd()
 
 	rec, ok := r.PathRecords[targetPath]
 	if ok {
@@ -178,57 +140,6 @@ func main() {
 	output, _ := json.Marshal(r)
 	ioutil.WriteFile(cachePath, output, 0644)
 	cacheFile.Close()
-}
-
-func sortRecords[v Record](r map[string]v) []string {
-	keys := make([]string, 0, len(r))
-	for key := range r {
-		keys = append(keys, key)
-	}
-
-	sort.SliceStable(keys, func(i, j int) bool {
-		return r[keys[i]].GetTimestamp() > r[keys[j]].GetTimestamp()
-	})
-
-	return keys
-}
-
-func (r Records) listRecords(recType string) {
-
-	var isPath = true
-
-	if recType == "stash" {
-		isPath = false
-	}
-
-	t := table.NewWriter()
-	t.SetOutputMirror(log.Writer())
-
-	if isPath {
-		t.AppendHeader(table.Row{"#", "path", "count", "timestamp"})
-	} else {
-		t.AppendHeader(table.Row{"#", "path", "timestamp"})
-	}
-
-	var keys []string
-
-	if isPath {
-		keys = sortRecords(r.PathRecords)
-	} else {
-		keys = sortRecords(r.StashRecords)
-	}
-
-	index := 1
-	for _, key := range keys {
-		if isPath {
-			t.AppendRow([]interface{}{index, key, r.PathRecords[key].Count, r.PathRecords[key].Timestamp})
-		} else {
-			t.AppendRow([]interface{}{index, key, r.StashRecords[key].Timestamp})
-		}
-		index++
-	}
-
-	t.Render()
 }
 
 func repeat(str string, times int) string {
