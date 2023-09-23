@@ -89,3 +89,15 @@ $ pwd
 # /home/zt/.config/waybar
 ```
 
+### -n usage
+
+Repeats the `chdir` command a number of `-n` times. Solely for parent directory jumping.  
+
+```shell
+$ pwd
+# /home/zt/my/path/uat/to/a/particular/directory
+$ cd -n 3 ..
+$ pwd
+# /home/zt/my/path/uat/to
+```
+
