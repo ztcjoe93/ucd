@@ -62,10 +62,10 @@ my
 To shift from `/my/path/ci/to/a/particular/directory` to `my/path/uat/to/a/particular/directory`, swap the directory to the argument after traversing to the parent directory `4` times.  
 
 ```shell
-zt@ragnarok-arch directory$ pwd
+$ pwd
 # /home/zt/my/path/ci/to/a/particular/directory
-zt@ragnarok-arch directory$ cd -d 4 uat
-zt@ragnarok-arch directory$ pwd
+$ cd -d 4 uat
+$ pwd
 # /home/zt/my/path/uat/to/a/particular/directory
 ```
 
@@ -74,7 +74,7 @@ zt@ragnarok-arch directory$ pwd
 Does a `chdir` into the indicated # path from either the history/stash list.  
 
 ```shell
-zt@ragnarok-arch zt$ cd -ls
+$ cd -ls
 +---+-------------------------+-------------------------+
 | # | PATH                    | TIMESTAMP               |
 +---+-------------------------+-------------------------+
@@ -82,10 +82,10 @@ zt@ragnarok-arch zt$ cd -ls
 | 2 | /home/zt/.config/hypr   | 2023-09-23 12:53:02 +08 |
 | 3 | /home/zt                | 2023-09-23 12:52:51 +08 |
 +---+-------------------------+-------------------------+
-zt@ragnarok-arch zt$ pwd
-/home/zt
-zt@ragnarok-arch zt$ cd -ps 1
-zt@ragnarok-arch waybar$ pwd
-/home/zt/.config/waybar
+$ pwd
+# /home/zt
+$ cd -ps 1
+$ pwd
+# /home/zt/.config/waybar
 ```
 
