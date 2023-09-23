@@ -15,7 +15,7 @@ Otherwise, you can download the binary and shift it into your usr/bin directory.
 
 ### Redirecting stdout to builtin shell
 
-Append the following to your specific shell [RCfile](https://en.wikipedia.org/wiki/RCFile) to forward stdout from `ucd` to shell's builtin `cd` command.
+Append the following to your specific shell [runcom](https://en.wikipedia.org/wiki/RUNCOM) file  to forward stdout from `ucd` to shell's builtin `cd` command.
 
 Example for .zshrc  
 ```shell
