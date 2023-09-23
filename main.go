@@ -16,6 +16,7 @@ import (
 var (
 	helpFlag        bool
 	clearFlag       bool
+	clearStashFlag  bool
 	dynamicSwapFlag int
 	numRepeatFlag   int
 	listFlag        bool
@@ -35,7 +36,8 @@ func main() {
 	// flags
 	flag.BoolVar(&helpFlag, "h", false, "display help")
 	flag.BoolVar(&versionFlag, "v", false, "display ucd version")
-	flag.BoolVar(&clearFlag, "c", false, "clear history and stash list")
+	flag.BoolVar(&clearFlag, "c", false, "clear history list")
+	flag.BoolVar(&clearStashFlag, "cs", false, "clear stash list")
 	flag.IntVar(&dynamicSwapFlag, "d", 0, "swap out directory to arg after -d parent directories")
 	flag.BoolVar(&listFlag, "l", false, "display Most Recently Used (MRU) list of paths chdir-ed into")
 	flag.BoolVar(&listStashFlag, "ls", false, "display list of stashed cd commands")
@@ -75,6 +77,17 @@ func main() {
 	if clearFlag {
 		r = records.Records{
 			PathRecords:  map[string]records.PathRecord{},
+			StashRecords: r.StashRecords,
+		}
+		output, _ := json.Marshal(r)
+		ioutil.WriteFile(cachePath, output, 0644)
+		fmt.Print(".")
+		os.Exit(1)
+	}
+
+	if clearStashFlag {
+		r = records.Records{
+			PathRecords:  r.PathRecords,
 			StashRecords: map[string]records.StashRecord{},
 		}
 		output, _ := json.Marshal(r)
