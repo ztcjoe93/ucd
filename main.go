@@ -22,6 +22,7 @@ var (
 	listFlag        bool
 	listStashFlag   bool
 	historyPathFlag int
+	stashPathFlag   int
 	stashFlag       bool
 	versionFlag     bool
 	cachePath       string
@@ -43,6 +44,7 @@ func main() {
 	flag.BoolVar(&listStashFlag, "ls", false, "display list of stashed cd commands")
 	flag.IntVar(&numRepeatFlag, "n", 1, "no. of times to execute chdir")
 	flag.IntVar(&historyPathFlag, "p", 0, "chdir to the indicated # from the MRU list")
+	flag.IntVar(&stashPathFlag, "ps", 0, "chdir to the indicated # from the stash list")
 	flag.BoolVar(&stashFlag, "s", false, "stash cd path into a separate list")
 	flag.Parse()
 
@@ -123,6 +125,9 @@ func main() {
 	} else if historyPathFlag > 0 {
 		mruRecords := records.SortRecords(r.PathRecords)
 		targetPath = mruRecords[historyPathFlag-1]
+	} else if stashPathFlag > 0 {
+		stashRecords := records.SortRecords(r.StashRecords)
+		targetPath = stashRecords[stashPathFlag-1]
 	} else {
 		if len(args) > 0 {
 			targetPath = repeat(args[0], numRepeatFlag)
