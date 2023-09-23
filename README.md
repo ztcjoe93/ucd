@@ -16,7 +16,8 @@ function cd() { builtin cd $(ucd $@) }
 | --- | --- | --- | --- |
 | -h | - | - | display help |
 | -v | - | - | display ucd version | 
-| -c | bool | false | clear history and stash list |
+| -c | bool | false | clear history list |
+| -cs | bool | false | clear stash list |
 | -d | int | 0 | swap directory at -d parent directories |
 | -l | - | - | display Most Recently Used (MRU) list of paths chdir-ed into |
 | -ls | - | - | display list of stashed cd commands |
