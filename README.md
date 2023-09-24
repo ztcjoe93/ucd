@@ -28,6 +28,7 @@ function cd() { builtin cd $(ucd $@) }
 | --- | --- | --- | --- |
 | -h | - | - | display help |
 | -v | - | - | display ucd version | 
+| -a | string |  | alias for stashed path, used in conjunction with -s |
 | -c | bool | false | clear history list |
 | -cs | bool | false | clear stash list |
 | -d | int | 0 | swap directory at -d parent directories |
@@ -35,6 +36,7 @@ function cd() { builtin cd $(ucd $@) }
 | -ls | - | - | display list of stashed cd commands |
 | -p | int | 0 | chdir to the indicated # from MRU list |
 | -ps | int | 0 | chdir to the indicated # from stash list |
+| -pa | string |  | chdir to path with matching alias from stash list |
 | -n | int | 1 | no. of times to execute chdir |
 | -s | bool | false | stash cd path into a separate list |
 
@@ -69,6 +71,22 @@ $ pwd
 # /home/zt/my/path/uat/to/a/particular/directory
 ```
 
+### -s / -a usage
+
+Stashes the cd-ed path when `-s` is provided. An alias can be provided with the `-a` parameter.
+
+```shell
+$ pwd
+# /
+$ cd -s -a usr-bin usr/bin
+$ cd -ls
++---+---------+----------+-------------------------+
+| # | ALIAS   | PATH     | TIMESTAMP               |
++---+---------+----------+-------------------------+
+| 1 | usr-bin | /usr/bin | 2023-09-24 22:27:25 +08 |
++---+---------+----------+-------------------------+
+```
+
 ### -p / -ps usage
 
 Does a `chdir` into the indicated # path from either the history/stash list.  
@@ -87,6 +105,28 @@ $ pwd
 $ cd -ps 1
 $ pwd
 # /home/zt/.config/waybar
+```
+
+### -pa usage
+
+Does a `chdir` into the matching path from the stash list if the provided alias exist.
+
+```shell
+$ cd -ls
++---+-----------+-------------------------+-------------------------+
+| # | ALIAS     | PATH                    | TIMESTAMP               |
++---+-----------+-------------------------+-------------------------+
+| 1 | ucd       | /home/zt/dev/ucd        | 2023-09-24 22:02:18 +08 |
+| 2 | hyperland | /home/zt/.config/hypr   | 2023-09-24 21:56:12 +08 |
+| 3 |           | /home/zt/.config/waybar | 2023-09-23 12:53:39 +08 |
+| 4 |           | /home/zt                | 2023-09-23 12:52:51 +08 |
++---+-----------+-------------------------+-------------------------+
+$ cd -pa hyperland
+$ pwd
+# /home/zt/.config/hypr
+$ cd -pa ucd
+$ pwd
+# /home/zt/dev/ucd
 ```
 
 ### -n usage

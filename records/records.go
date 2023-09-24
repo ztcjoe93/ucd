@@ -33,6 +33,7 @@ func (pr PathRecord) HasCount() bool {
 
 type StashRecord struct {
 	Timestamp string `json:"ts"`
+	Alias     string `json:"alias"`
 }
 
 func (sr StashRecord) GetTimestamp() string {
@@ -57,7 +58,7 @@ func (r Records) ListRecords(recType string) {
 	if isPath {
 		t.AppendHeader(table.Row{"#", "path", "count", "timestamp"})
 	} else {
-		t.AppendHeader(table.Row{"#", "path", "timestamp"})
+		t.AppendHeader(table.Row{"#", "alias", "path", "timestamp"})
 	}
 
 	var keys []string
@@ -73,7 +74,7 @@ func (r Records) ListRecords(recType string) {
 		if isPath {
 			t.AppendRow([]interface{}{index, key, r.PathRecords[key].Count, r.PathRecords[key].Timestamp})
 		} else {
-			t.AppendRow([]interface{}{index, key, r.StashRecords[key].Timestamp})
+			t.AppendRow([]interface{}{index, r.StashRecords[key].Alias, key, r.StashRecords[key].Timestamp})
 		}
 		index++
 	}
