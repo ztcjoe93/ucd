@@ -7,7 +7,7 @@ A wrapper for the common `cd` shell utility, with totally unnecessary features.
 
 If you have golang installed in your environment, you can build the golang binary and shift it into your usr/bin directory.  
 ```shell
-go build . && sudo chmod +x ucd && sudo mv ucd/usr/local/bin/ucd
+go build . && sudo chmod +x ucd && sudo mv ucd /usr/local/bin/ucd
 ```
 
 Otherwise, you can download the binary and shift it into your usr/bin directory.
