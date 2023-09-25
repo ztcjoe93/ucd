@@ -1,37 +1,53 @@
 package configurations
 
 import (
-	"log"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"os"
 	"errors"
+	"io/ioutil"
+	"log"
+	"os"
 )
 
 type Configuration struct {
-	MaxMRU string `json:"MaxMRU"`
-	SomethingElse string `json:"SomethingElse"`
+	MaxMRUDisplay string `json:"MaxMRUDisplay"`
 }
 
 func DefaultConfigurations() Configuration {
-	return Configuration {
-		MaxMRU: "10",
-		SomethingElse: "3",
+	return Configuration{
+		MaxMRUDisplay: "10",
 	}
 }
 
 func (c Configuration) GetConfigurations() Configuration {
-	
+
 	configurations := DefaultConfigurations()
 
 	homeDir, _ := os.UserHomeDir()
-	configPath := homeDir + "/.config/ucd.conf"
-	configFile, err := os.Open(configPath)
+	configPath := homeDir + "/.config/ucd/"
+	configFileName := "ucd.conf"
+	configFile, err := os.Open(configPath + configFileName)
 
 	if errors.Is(err, os.ErrNotExist) {
-		log.Fatalln("File does not exist")
-		// marshall default configurations into configPath
+		err := os.MkdirAll(configPath, 0700)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		configFile, err := os.Create(configPath + configFileName)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		defer configFile.Close()
+
+		defaultConfigs, err := json.MarshalIndent(configurations, "", "\t")
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		configFile.Write(defaultConfigs)
+		configFile.Sync()
+		configFile.Close()
+
 	} else {
 		configFileBytes, _ := ioutil.ReadAll(configFile)
 		err := json.Unmarshal(configFileBytes, &configurations)
@@ -40,8 +56,6 @@ func (c Configuration) GetConfigurations() Configuration {
 			log.Fatalln("Error decoding configurations:", err)
 		}
 	}
-
-	fmt.Printf("contents of decoded json is: %#v\r\n", configurations)
 
 	return configurations
 }

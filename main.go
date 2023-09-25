@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ztcjoe93/ucd/records"
 	"github.com/ztcjoe93/ucd/configurations"
+	"github.com/ztcjoe93/ucd/records"
 )
 
 var (
@@ -68,9 +68,9 @@ func main() {
 		returnCwd()
 	}
 
+	// Configurations fetch
 	var c configurations.Configuration
 	c = c.GetConfigurations()
-	//fmt.Println(c.MaxMRU)
 
 	cachePath = homeDir + "/.ucd-cache"
 	cacheFile, _ := os.Open(cachePath)
@@ -242,4 +242,3 @@ func repeat(str string, times int) string {
 func timeNow() string {
 	return time.Now().Format("2006-01-02 15:04:05 MST")
 }
-
