@@ -34,6 +34,7 @@ function cd() { builtin cd $(ucd $@) }
 | -d | int | 0 | swap directory at -d parent directories |
 | -l | - | - | display Most Recently Used (MRU) list of paths chdir-ed into |
 | -ls | - | - | display list of stashed cd commands |
+| -ma | int | 0 | modify alias of indicated # from the stash list |
 | -p | int | 0 | chdir to the indicated # from MRU list |
 | -ps | int | 0 | chdir to the indicated # from stash list |
 | -pa | string |  | chdir to path with matching alias from stash list |
@@ -85,6 +86,34 @@ $ cd -ls
 +---+---------+----------+-------------------------+
 | 1 | usr-bin | /usr/bin | 2023-09-24 22:27:25 +08 |
 +---+---------+----------+-------------------------+
+```
+
+### -ma usage
+
+Modifies the alias for the indicated # path from the stash list.  
+
+```shell
+$ cd -ls
++---+-------+------------------+-------------------------+
+| # | ALIAS | PATH             | TIMESTAMP               |
++---+-------+------------------+-------------------------+
+| 1 | ucd   | /home/zt/dev/ucd | 2023-09-24 22:28:11 +08 |
+| 2 | mybin | /usr/bin         | 2023-09-24 22:27:25 +08 |
++---+-------+------------------+-------------------------+
+$ cd -ma 2 usr/bin
++---+---------+------------------+-------------------------+
+| # | ALIAS   | PATH             | TIMESTAMP               |
++---+---------+------------------+-------------------------+
+| 1 | ucd     | /home/zt/dev/ucd | 2023-09-24 22:28:11 +08 |
+| 2 | usr/bin | /usr/bin         | 2023-09-24 22:27:25 +08 |
++---+---------+------------------+-------------------------+
+$ cd -ls
++---+---------+------------------+-------------------------+
+| # | ALIAS   | PATH             | TIMESTAMP               |
++---+---------+------------------+-------------------------+
+| 1 | ucd     | /home/zt/dev/ucd | 2023-09-24 22:28:11 +08 |
+| 2 | usr/bin | /usr/bin         | 2023-09-24 22:27:25 +08 |
++---+---------+------------------+-------------------------+
 ```
 
 ### -p / -ps usage

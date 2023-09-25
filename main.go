@@ -24,6 +24,7 @@ var (
 	listStashFlag   bool
 	historyPathFlag int
 	aliasPathFlag   string
+	modifyAliasFlag int
 	stashPathFlag   int
 	stashFlag       bool
 	versionFlag     bool
@@ -45,6 +46,7 @@ func main() {
 	flag.IntVar(&dynamicSwapFlag, "d", 0, "swap out directory to arg after -d parent directories")
 	flag.BoolVar(&listFlag, "l", false, "display Most Recently Used (MRU) list of paths chdir-ed into")
 	flag.BoolVar(&listStashFlag, "ls", false, "display list of stashed cd commands")
+	flag.IntVar(&modifyAliasFlag, "ma", 0, "modify alias of indicated # from the stash list")
 	flag.IntVar(&numRepeatFlag, "n", 1, "no. of times to execute chdir")
 	flag.IntVar(&historyPathFlag, "p", 0, "chdir to the indicated # from the MRU list")
 	flag.IntVar(&stashPathFlag, "ps", 0, "chdir to the indicated # from the stash list")
@@ -119,6 +121,21 @@ func main() {
 
 	if len(args) > 1 {
 		log.Fatalln("Only < 1 arguments can be passed to ucd")
+	}
+
+	if modifyAliasFlag > 0 {
+		srk := records.SortRecords(r.StashRecords)
+		sr := r.StashRecords[srk[modifyAliasFlag-1]]
+		sr.Alias = args[0]
+		r.StashRecords[srk[modifyAliasFlag-1]] = sr
+
+		output, _ := json.Marshal(r)
+		ioutil.WriteFile(cachePath, output, 0644)
+		cacheFile.Close()
+
+		r.ListRecords("stash")
+		fmt.Print(".")
+		os.Exit(1)
 	}
 
 	// fmt.Print sends output to stdout, this will be consumed by builtin `cd` command
