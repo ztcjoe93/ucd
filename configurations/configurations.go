@@ -3,18 +3,18 @@ package configurations
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 )
 
 type Configuration struct {
-	MaxMRUDisplay string `json:"MaxMRUDisplay"`
+	MaxMRUDisplay int `json:"MaxMRUDisplay"`
 }
 
 func DefaultConfigurations() Configuration {
 	return Configuration{
-		MaxMRUDisplay: "10",
+		MaxMRUDisplay: 10,
 	}
 }
 
@@ -32,29 +32,19 @@ func (c Configuration) GetConfigurations() Configuration {
 		if err != nil {
 			log.Fatalln(err)
 		}
+	}
 
-		configFile, err := os.Create(configPath + configFileName)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		defer configFile.Close()
+	configFileBytes, _ := io.ReadAll(configFile)
 
-		defaultConfigs, err := json.MarshalIndent(configurations, "", "\t")
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		configFile.Write(defaultConfigs)
-		configFile.Sync()
-		configFile.Close()
-
-	} else {
-		configFileBytes, _ := ioutil.ReadAll(configFile)
+	if len(configFileBytes) > 0 {
 		err := json.Unmarshal(configFileBytes, &configurations)
 
 		if err != nil {
 			log.Fatalln("Error decoding configurations:", err)
 		}
+	} else {
+		defaultConfigs, _ := json.MarshalIndent(configurations, "", "\t")
+		os.WriteFile(configPath+configFileName, defaultConfigs, 0644)
 	}
 
 	return configurations
