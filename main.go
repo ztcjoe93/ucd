@@ -59,14 +59,12 @@ func main() {
 
 	if helpFlag {
 		flag.PrintDefaults()
-		fmt.Print(".")
-		os.Exit(1)
+		returnCwd()
 	}
 
 	if versionFlag {
 		log.Printf("%v\n", version)
-		fmt.Print(".")
-		os.Exit(1)
+		returnCwd()
 	}
 
 	cachePath = homeDir + "/.ucd-cache"
@@ -89,8 +87,7 @@ func main() {
 		}
 		output, _ := json.Marshal(r)
 		ioutil.WriteFile(cachePath, output, 0644)
-		fmt.Print(".")
-		os.Exit(1)
+		returnCwd()
 	}
 
 	if clearStashFlag {
@@ -100,23 +97,18 @@ func main() {
 		}
 		output, _ := json.Marshal(r)
 		ioutil.WriteFile(cachePath, output, 0644)
-		fmt.Print(".")
-		os.Exit(1)
+		returnCwd()
 	}
 
 	// exit earlier depending on flag passed in
 	if listFlag {
 		r.ListRecords("path")
-		fmt.Print(".")
-
-		os.Exit(1)
+		returnCwd()
 	}
 
 	if listStashFlag {
 		r.ListRecords("stash")
-		fmt.Print(".")
-
-		os.Exit(1)
+		returnCwd()
 	}
 
 	if len(args) > 1 {
@@ -134,8 +126,7 @@ func main() {
 		cacheFile.Close()
 
 		r.ListRecords("stash")
-		fmt.Print(".")
-		os.Exit(1)
+		returnCwd()
 	}
 
 	// fmt.Print sends output to stdout, this will be consumed by builtin `cd` command
@@ -173,8 +164,7 @@ func main() {
 	}
 
 	if isInvalidPath(targetPath) {
-		fmt.Print(targetPath)
-		os.Exit(1)
+		returnCwd()
 	}
 
 	targetPath, _ = os.Getwd()
@@ -196,6 +186,11 @@ func main() {
 	output, _ := json.Marshal(r)
 	ioutil.WriteFile(cachePath, output, 0644)
 	cacheFile.Close()
+}
+
+func returnCwd() {
+	fmt.Print(".")
+	os.Exit(1)
 }
 
 func dynamicPathSwap(swapArg string, upCount int) string {
