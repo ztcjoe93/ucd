@@ -114,6 +114,7 @@ func main() {
 
 	if len(args) > 1 {
 		log.Fatalln("Only < 1 arguments can be passed to ucd")
+		returnCwd()
 	}
 
 	if modifyAliasFlag > 0 {
