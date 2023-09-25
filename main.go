@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -75,7 +75,7 @@ func main() {
 	cachePath = homeDir + "/.ucd-cache"
 	cacheFile, _ := os.Open(cachePath)
 	defer cacheFile.Close()
-	byteValue, _ := ioutil.ReadAll(cacheFile)
+	byteValue, _ := io.ReadAll(cacheFile)
 
 	var r records.Records
 	err := json.Unmarshal(byteValue, &r)
@@ -92,7 +92,7 @@ func main() {
 			StashRecords: r.StashRecords,
 		}
 		output, _ := json.Marshal(r)
-		ioutil.WriteFile(cachePath, output, 0644)
+		os.WriteFile(cachePath, output, 0644)
 		returnCwd()
 	}
 
@@ -102,7 +102,7 @@ func main() {
 			StashRecords: map[string]records.StashRecord{},
 		}
 		output, _ := json.Marshal(r)
-		ioutil.WriteFile(cachePath, output, 0644)
+		os.WriteFile(cachePath, output, 0644)
 		returnCwd()
 	}
 
@@ -129,7 +129,7 @@ func main() {
 		r.StashRecords[srk[modifyAliasFlag-1]] = sr
 
 		output, _ := json.Marshal(r)
-		ioutil.WriteFile(cachePath, output, 0644)
+		os.WriteFile(cachePath, output, 0644)
 
 		r.ListRecords("stash")
 		returnCwd()
@@ -190,7 +190,7 @@ func main() {
 	}
 
 	output, _ := json.Marshal(r)
-	ioutil.WriteFile(cachePath, output, 0644)
+	os.WriteFile(cachePath, output, 0644)
 }
 
 func returnCwd() {
