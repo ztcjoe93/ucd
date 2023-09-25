@@ -69,6 +69,7 @@ func main() {
 
 	cachePath = homeDir + "/.ucd-cache"
 	cacheFile, _ := os.Open(cachePath)
+	defer cacheFile.Close()
 	byteValue, _ := ioutil.ReadAll(cacheFile)
 
 	var r records.Records
@@ -123,7 +124,6 @@ func main() {
 
 		output, _ := json.Marshal(r)
 		ioutil.WriteFile(cachePath, output, 0644)
-		cacheFile.Close()
 
 		r.ListRecords("stash")
 		returnCwd()
@@ -185,7 +185,6 @@ func main() {
 
 	output, _ := json.Marshal(r)
 	ioutil.WriteFile(cachePath, output, 0644)
-	cacheFile.Close()
 }
 
 func returnCwd() {
