@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ztcjoe93/ucd/configurations"
 	"github.com/ztcjoe93/ucd/records"
 )
 
@@ -66,6 +67,10 @@ func main() {
 		log.Printf("%v\n", version)
 		returnCwd()
 	}
+
+	// Configurations fetch
+	var c configurations.Configuration
+	c = c.GetConfigurations()
 
 	cachePath = homeDir + "/.ucd-cache"
 	cacheFile, _ := os.Open(cachePath)
