@@ -170,3 +170,12 @@ $ pwd
 # /home/zt/my/path/uat/to
 ```
 
+## Configuration
+
+On `ucd`'s first run, a `ucd.conf` JSON file is generated at `$HOME/.config/ucd`, where k-v pairs can be passed in to tweak certain features.  
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| MaxMRUDisplay | int | 10 | Limits the total number of paths displayed when using `-l` or `-ls` |
+
+
