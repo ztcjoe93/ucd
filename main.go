@@ -15,6 +15,7 @@ import (
 )
 
 var (
+	configs         configurations.Configuration
 	aliasFlag       string
 	helpFlag        bool
 	clearFlag       bool
@@ -68,9 +69,7 @@ func main() {
 		returnCwd()
 	}
 
-	// Configurations fetch
-	var c configurations.Configuration
-	c = c.GetConfigurations()
+	configs = configs.GetConfigurations()
 
 	cachePath = homeDir + "/.ucd-cache"
 	cacheFile, _ := os.Open(cachePath)
@@ -108,12 +107,12 @@ func main() {
 
 	// exit earlier depending on flag passed in
 	if listFlag {
-		r.ListRecords("path")
+		r.ListRecords("path", configs.MaxMRUDisplay)
 		returnCwd()
 	}
 
 	if listStashFlag {
-		r.ListRecords("stash")
+		r.ListRecords("stash", configs.MaxMRUDisplay)
 		returnCwd()
 	}
 
@@ -131,7 +130,7 @@ func main() {
 		output, _ := json.Marshal(r)
 		os.WriteFile(cachePath, output, 0644)
 
-		r.ListRecords("stash")
+		r.ListRecords("stash", configs.MaxMRUDisplay)
 		returnCwd()
 	}
 

@@ -44,7 +44,7 @@ func (sr StashRecord) HasCount() bool {
 	return false
 }
 
-func (r Records) ListRecords(recType string) {
+func (r Records) ListRecords(recType string, maxLimit int) {
 
 	var isPath = true
 
@@ -69,7 +69,23 @@ func (r Records) ListRecords(recType string) {
 		keys = SortRecords(r.StashRecords)
 	}
 
-	index := 1
+	displayLimit := len(keys)
+	if maxLimit < displayLimit {
+		displayLimit = maxLimit
+	}
+
+	for i := 0; i < displayLimit; i++ {
+		if isPath {
+			t.AppendRow([]interface{}{
+				i + 1, keys[i], r.PathRecords[keys[i]].Count, r.PathRecords[keys[i]].Timestamp,
+			})
+		} else {
+			t.AppendRow([]interface{}{
+				i + 1, r.StashRecords[keys[i]].Alias, keys[i], r.StashRecords[keys[i]].Timestamp,
+			})
+		}
+	}
+	/**
 	for _, key := range keys {
 		if isPath {
 			t.AppendRow([]interface{}{index, key, r.PathRecords[key].Count, r.PathRecords[key].Timestamp})
@@ -78,6 +94,7 @@ func (r Records) ListRecords(recType string) {
 		}
 		index++
 	}
+	**/
 
 	t.Render()
 }
