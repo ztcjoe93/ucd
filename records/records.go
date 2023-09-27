@@ -85,16 +85,6 @@ func (r Records) ListRecords(recType string, maxLimit int) {
 			})
 		}
 	}
-	/**
-	for _, key := range keys {
-		if isPath {
-			t.AppendRow([]interface{}{index, key, r.PathRecords[key].Count, r.PathRecords[key].Timestamp})
-		} else {
-			t.AppendRow([]interface{}{index, r.StashRecords[key].Alias, key, r.StashRecords[key].Timestamp})
-		}
-		index++
-	}
-	**/
 
 	t.Render()
 }
