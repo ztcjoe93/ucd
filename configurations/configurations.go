@@ -13,7 +13,7 @@ type Configuration struct {
 
 func DefaultConfigurations() Configuration {
 	return Configuration{
-		MaxMRUDisplay: 10,
+		MaxMRUDisplay: -1,
 	}
 }
 
