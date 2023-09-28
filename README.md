@@ -176,6 +176,12 @@ On `ucd`'s first run, a `ucd.conf` JSON file is generated at `$HOME/.config/ucd`
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| MaxMRUDisplay | int | 10 | Limits the total number of paths displayed when using `-l` or `-ls` |
+| MaxMRUDisplay | int | -1 | Limits the total number of paths displayed when using `-l` or `-ls`. Set this to `-1` to show all records. |
 
+## Testing
+
+To run all test suites, run the following in the repo root directory: 
+```shell
+go test -v ./...
+```
 
