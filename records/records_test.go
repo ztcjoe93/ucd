@@ -45,3 +45,30 @@ func TestSortPathRecords(t *testing.T) {
 		t.Fatalf(`path1 is not the last record`)
 	}
 }
+
+func TestSortStashRecords(t *testing.T) {
+	pr := map[string]StashRecord{
+		"path1": StashRecord{Timestamp: "1990-01-01 00:00:01 +08", Alias: "apple"},
+		"path2": StashRecord{Timestamp: "1991-01-01 00:00:01 +08", Alias: "banana"},
+		"path3": StashRecord{Timestamp: "2024-04-01 12:34:12 +08", Alias: "pear"},
+		"path4": StashRecord{Timestamp: "2016-02-23 22:10:10 +08", Alias: "orange"},
+	}
+
+	records := SortRecords(pr)
+
+	if records[0] != "path3" && pr[records[0]].Alias != "pear" {
+		t.Fatalf(`path3 is not the latest record`)
+	}
+
+	if records[1] != "path4" && pr[records[1]].Alias != "orange" {
+		t.Fatalf(`path4 is not the 2nd record`)
+	}
+
+	if records[2] != "path2" && pr[records[2]].Alias != "banana" {
+		t.Fatalf(`path2 is not the 3rd record`)
+	}
+
+	if records[3] != "path1" && pr[records[3]].Alias != "apple" {
+		t.Fatalf(`path1 is not the last record`)
+	}
+}
