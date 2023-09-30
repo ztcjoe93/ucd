@@ -1,7 +1,9 @@
 name: go-tests
 
+on: workflow_dispatch
+
 jobs:
-  runs-on: 
+  runs-on: ubuntu-latest
   steps:
     - uses: actions/checkout@v3
 
