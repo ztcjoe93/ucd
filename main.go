@@ -171,11 +171,14 @@ func main() {
 
 		if !found {
 			log.Printf("unable to cd -- alias ``%v` not found\n", aliasPathFlag)
-			fmt.Print(".")
-			os.Exit(1)
+			returnCwd()
 		}
 	} else if historyPathFlag > 0 {
 		mruRecords := records.SortRecords(r.PathRecords)
+		if historyPathFlag-1 > len(mruRecords)-1 {
+			log.Printf("invalid #, there are only %v records\n", len(mruRecords))
+			returnCwd()
+		}
 		targetPath = mruRecords[historyPathFlag-1]
 	} else if stashPathFlag > 0 {
 		stashRecords := records.SortRecords(r.StashRecords)
