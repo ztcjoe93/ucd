@@ -243,6 +243,7 @@ func prependStrSlice(x []string, y string) []string {
 func isInvalidPath(targetPath string) bool {
 	err := os.Chdir(targetPath)
 	if err != nil {
+		log.Printf("path `%v` is not a valid path\n", targetPath)
 		return true
 	}
 
