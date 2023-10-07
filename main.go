@@ -157,6 +157,7 @@ func main() {
 	// fmt.Print sends output to stdout, this will be consumed by builtin `cd` command
 
 	var targetPath string
+
 	if dynamicSwapFlag > 0 {
 		targetPath = dynamicPathSwap(args[0], dynamicSwapFlag)
 	} else if aliasPathFlag != "" {
@@ -189,6 +190,11 @@ func main() {
 		} else {
 			targetPath = homeDir
 		}
+	}
+
+	if targetPath == "-" {
+		fmt.Print("-")
+		os.Exit(1)
 	}
 
 	if isInvalidPath(targetPath) {
