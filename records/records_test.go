@@ -72,3 +72,25 @@ func TestSortStashRecords(t *testing.T) {
 		t.Fatalf(`path1 is not the last record`)
 	}
 }
+
+func TestAliasExists(t *testing.T) {
+	r := Records{
+		PathRecords: map[string]PathRecord{},
+		StashRecords: map[string]StashRecord{
+			"path1": StashRecord{Timestamp: "1991-01-01 01:01:01 +08", Alias: "ape"},
+			"path2": StashRecord{Timestamp: "1991-01-01 01:01:01 +08", Alias: "bear"},
+		},
+	}
+
+	if !r.AliasExists("ape") {
+		t.Fatalf(`ape alias is not detected in StashRecords`)
+	}
+
+	if !r.AliasExists("bear") {
+		t.Fatalf(`bear alias is not detected in StashRecords`)
+	}
+
+	if r.AliasExists("cat") {
+		t.Fatalf(`cat alias is detected in StashRecords but does not exists`)
+	}
+}

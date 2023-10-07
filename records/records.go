@@ -101,3 +101,13 @@ func SortRecords[v Record](r map[string]v) []string {
 
 	return keys
 }
+
+func (r Records) AliasExists(alias string) bool {
+	for _, rec := range r.StashRecords {
+		if rec.Alias == alias {
+			return true
+		}
+	}
+
+	return false
+}

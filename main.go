@@ -206,10 +206,14 @@ func main() {
 		r.PathRecords[targetPath] = records.PathRecord{Count: 1, Timestamp: timeNow()}
 	}
 
-	fmt.Print(targetPath)
 	if stashFlag {
+		if r.AliasExists(aliasFlag) {
+			log.Printf("Alias `%v` already exists\n", aliasFlag)
+			returnCwd()
+		}
 		r.StashRecords[targetPath] = records.StashRecord{Alias: aliasFlag, Timestamp: timeNow()}
 	}
+	fmt.Print(targetPath)
 
 	output, _ := json.Marshal(r)
 	os.WriteFile(cachePath, output, 0644)
