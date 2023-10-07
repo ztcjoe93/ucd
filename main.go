@@ -137,7 +137,7 @@ func main() {
 	}
 
 	if len(args) > 1 {
-		log.Fatalln("Only < 1 arguments can be passed to ucd")
+		log.Printf("Only < 1 arguments, found %v args can be passed to ucd\n", len(args))
 		returnCwd()
 	}
 
