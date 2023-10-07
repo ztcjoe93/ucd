@@ -1,3 +1,5 @@
+[![go-tests](https://github.com/ztcjoe93/ucd/actions/workflows/test.yml/badge.svg?branch=main&event=workflow_dispatch)](https://github.com/ztcjoe93/ucd/actions/workflows/test.yml)
+
 # Unnecessary chdir (UCD)
 A wrapper for the common `cd` shell utility, with totally unnecessary features.
 
