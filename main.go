@@ -219,6 +219,8 @@ func main() {
 		}
 		r.StashRecords[targetPath] = records.StashRecord{Alias: aliasFlag, Timestamp: timeNow()}
 	}
+
+	strings.Replace(targetPath, " ", "\\ ", -1)
 	fmt.Print(targetPath)
 
 	output, _ := json.Marshal(r)
