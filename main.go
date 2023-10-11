@@ -19,7 +19,6 @@ var (
 	aliasFlag       string
 	helpFlag        bool
 	clearFlag       bool
-	clearLimitFlag  bool
 	clearStashFlag  bool
 	dynamicSwapFlag int
 	numRepeatFlag   int
@@ -45,7 +44,6 @@ func main() {
 	flag.StringVar(&aliasFlag, "a", "", "alias for stashed path, used in conjunction with -s")
 	flag.BoolVar(&versionFlag, "v", false, "display ucd version")
 	flag.BoolVar(&clearFlag, "c", false, "clear history list")
-	flag.BoolVar(&clearLimitFlag, "cl", false, "clear history list till MaxMRUDisplay limit")
 	flag.BoolVar(&clearStashFlag, "cs", false, "clear stash list")
 	flag.IntVar(&dynamicSwapFlag, "d", 0, "swap out directory to arg after -d parent directories")
 	flag.BoolVar(&listFlag, "l", false, "display Most Recently Used (MRU) list of paths chdir-ed into")
@@ -95,20 +93,6 @@ func main() {
 		r = records.Records{
 			PathRecords:  map[string]records.PathRecord{},
 			StashRecords: r.StashRecords,
-		}
-		output, _ := json.Marshal(r)
-		os.WriteFile(cachePath, output, 0644)
-		returnCwd()
-	}
-
-	if clearLimitFlag {
-		rk := records.SortRecords(r.PathRecords)
-
-		if len(rk) > configs.MaxMRUDisplay {
-			for i := configs.MaxMRUDisplay; i < len(rk); i++ {
-				delete(r.PathRecords, rk[i])
-			}
-
 		}
 		output, _ := json.Marshal(r)
 		os.WriteFile(cachePath, output, 0644)
@@ -220,6 +204,7 @@ func main() {
 		r.StashRecords[targetPath] = records.StashRecord{Alias: aliasFlag, Timestamp: timeNow()}
 	}
 
+	autoClear(&r, configs.MaxMRUDisplay)
 	strings.Replace(targetPath, " ", "\\ ", -1)
 	fmt.Print(targetPath)
 
@@ -276,4 +261,15 @@ func repeat(str string, times int) string {
 
 func timeNow() string {
 	return time.Now().Format("2006-01-02 15:04:05 MST")
+}
+
+func autoClear(r *records.Records, limit int) {
+	rk := records.SortRecords(r.PathRecords)
+
+	if len(rk) > limit {
+		for i := limit; i < len(rk); i++ {
+			delete(r.PathRecords, rk[i])
+		}
+
+	}
 }
