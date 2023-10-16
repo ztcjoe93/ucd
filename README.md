@@ -187,3 +187,6 @@ To run all test suites, run the following in the repo root directory:
 go test -v ./...
 ```
 
+## License
+
+`ucd` is released under the [MIT](LICENSE.md) license.
