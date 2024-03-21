@@ -179,6 +179,7 @@ On `ucd`'s first run, a `ucd.conf` JSON file is generated at `$HOME/.config/ucd`
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
 | MaxMRUDisplay | int | -1 | Limits the total number of paths displayed when using `-l` or `-ls`. Set this to `-1` to show all records. |
+| FileFallbackBehavior | bool | true | Toggle to set if the default behavior of cd-ing to a file is to fallback to its parent directory |
 
 ## Testing
 
