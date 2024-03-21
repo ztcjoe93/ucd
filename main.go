@@ -35,7 +35,7 @@ var (
 	cacheFile       *os.File
 
 	invalidPath bool   = false
-	version     string = "ucd v0.1.0"
+	version     string = "ucd v0.1.1"
 )
 
 func main() {
