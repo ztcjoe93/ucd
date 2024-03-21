@@ -179,7 +179,7 @@ func main() {
 
 	if targetPath == "-" {
 		fmt.Print("-")
-		os.Exit(1)
+		os.Exit(0)
 	}
 
 	if isInvalidPath(targetPath) {
@@ -219,7 +219,7 @@ func main() {
 
 func returnCwd() {
 	fmt.Print(".")
-	os.Exit(1)
+	os.Exit(0)
 }
 
 func dynamicPathSwap(swapArg string, upCount int) string {
@@ -260,7 +260,7 @@ func getParentDir(targetPath string) string {
 	err := os.Chdir(parentPath)
 	if err != nil {
 		log.Printf("path `%v` is not a valid path\n", targetPath)
-		os.Exit(1)
+		os.Exit(0)
 	}
 
 	// allow fallback to cwd if invalid path is provided
