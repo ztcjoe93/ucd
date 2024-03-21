@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -182,10 +183,14 @@ func main() {
 	}
 
 	if isInvalidPath(targetPath) {
-		returnCwd()
+		if configs.FileFallbackBehavior {
+			targetPath = getParentDir(targetPath)
+		} else {
+			returnCwd()
+		}
+	} else {
+		targetPath, _ = os.Getwd()
 	}
-
-	targetPath, _ = os.Getwd()
 
 	rec, ok := r.PathRecords[targetPath]
 	if ok {
@@ -248,6 +253,20 @@ func isInvalidPath(targetPath string) bool {
 	}
 
 	return false
+}
+
+func getParentDir(targetPath string) string {
+	parentPath := filepath.Dir(targetPath)
+	err := os.Chdir(parentPath)
+	if err != nil {
+		log.Printf("path `%v` is not a valid path\n", targetPath)
+		os.Exit(1)
+	}
+
+	// allow fallback to cwd if invalid path is provided
+	parentPath, _ = os.Getwd()
+	log.Printf("Falling back to parent directory %v\n", parentPath)
+	return parentPath
 }
 
 func repeat(str string, times int) string {

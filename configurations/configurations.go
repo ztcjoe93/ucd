@@ -8,12 +8,14 @@ import (
 )
 
 type Configuration struct {
-	MaxMRUDisplay int `json:"MaxMRUDisplay"`
+	MaxMRUDisplay        int  `json:"MaxMRUDisplay"`
+	FileFallbackBehavior bool `json:"FileFallbackBehavior"`
 }
 
 func DefaultConfigurations() Configuration {
 	return Configuration{
-		MaxMRUDisplay: -1,
+		MaxMRUDisplay:        -1,
+		FileFallbackBehavior: true,
 	}
 }
 
