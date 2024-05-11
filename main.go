@@ -7,12 +7,11 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/ztcjoe93/ucd/configurations"
 	"github.com/ztcjoe93/ucd/records"
+	"github.com/ztcjoe93/ucd/utilities"
 )
 
 var (
@@ -62,12 +61,12 @@ func main() {
 
 	if helpFlag {
 		flag.PrintDefaults()
-		returnCwd()
+		utilities.ReturnCwd()
 	}
 
 	if versionFlag {
 		log.Printf("%v\n", version)
-		returnCwd()
+		utilities.ReturnCwd()
 	}
 
 	configs = configs.GetConfigurations()
@@ -97,7 +96,7 @@ func main() {
 		}
 		output, _ := json.Marshal(r)
 		os.WriteFile(cachePath, output, 0644)
-		returnCwd()
+		utilities.ReturnCwd()
 	}
 
 	if clearStashFlag {
@@ -107,23 +106,23 @@ func main() {
 		}
 		output, _ := json.Marshal(r)
 		os.WriteFile(cachePath, output, 0644)
-		returnCwd()
+		utilities.ReturnCwd()
 	}
 
 	// exit earlier depending on flag passed in
 	if listFlag {
 		r.ListRecords("path", configs.MaxMRUDisplay)
-		returnCwd()
+		utilities.ReturnCwd()
 	}
 
 	if listStashFlag {
 		r.ListRecords("stash", configs.MaxMRUDisplay)
-		returnCwd()
+		utilities.ReturnCwd()
 	}
 
 	if len(args) > 1 {
 		log.Printf("Only < 1 arguments, found %v args can be passed to ucd\n", len(args))
-		returnCwd()
+		utilities.ReturnCwd()
 	}
 
 	if modifyAliasFlag > 0 {
@@ -136,7 +135,7 @@ func main() {
 		os.WriteFile(cachePath, output, 0644)
 
 		r.ListRecords("stash", configs.MaxMRUDisplay)
-		returnCwd()
+		utilities.ReturnCwd()
 	}
 
 	// fmt.Print sends output to stdout, this will be consumed by builtin `cd` command
@@ -144,7 +143,7 @@ func main() {
 	var targetPath string
 
 	if dynamicSwapFlag > 0 {
-		targetPath = dynamicPathSwap(args[0], dynamicSwapFlag)
+		targetPath = utilities.DynamicPathSwap(args[0], dynamicSwapFlag)
 	} else if aliasPathFlag != "" {
 		found := false
 		for key, rec := range r.StashRecords {
@@ -157,13 +156,13 @@ func main() {
 
 		if !found {
 			log.Printf("unable to cd -- alias ``%v` not found\n", aliasPathFlag)
-			returnCwd()
+			utilities.ReturnCwd()
 		}
 	} else if historyPathFlag > 0 {
 		mruRecords := records.SortRecords(r.PathRecords)
 		if historyPathFlag-1 > len(mruRecords)-1 {
 			log.Printf("invalid #, there are only %v records\n", len(mruRecords))
-			returnCwd()
+			utilities.ReturnCwd()
 		}
 		targetPath = mruRecords[historyPathFlag-1]
 	} else if stashPathFlag > 0 {
@@ -171,7 +170,7 @@ func main() {
 		targetPath = stashRecords[stashPathFlag-1]
 	} else {
 		if len(args) > 0 {
-			targetPath = repeat(args[0], numRepeatFlag)
+			targetPath = utilities.Repeat(args[0], numRepeatFlag)
 		} else {
 			targetPath = homeDir
 		}
@@ -182,11 +181,11 @@ func main() {
 		os.Exit(0)
 	}
 
-	if isInvalidPath(targetPath) {
+	if utilities.IsInvalidPath(targetPath) {
 		if configs.FileFallbackBehavior {
-			targetPath = getParentDir(targetPath)
+			targetPath = utilities.GetParentDir(targetPath)
 		} else {
-			returnCwd()
+			utilities.ReturnCwd()
 		}
 	} else {
 		targetPath, _ = os.Getwd()
@@ -195,100 +194,24 @@ func main() {
 	rec, ok := r.PathRecords[targetPath]
 	if ok {
 		rec.Count++
-		rec.Timestamp = timeNow()
+		rec.Timestamp = utilities.TimeNow()
 		r.PathRecords[targetPath] = rec
 	} else {
-		r.PathRecords[targetPath] = records.PathRecord{Count: 1, Timestamp: timeNow()}
+		r.PathRecords[targetPath] = records.PathRecord{Count: 1, Timestamp: utilities.TimeNow()}
 	}
 
 	if stashFlag {
 		if r.AliasExists(aliasFlag) {
 			log.Printf("Alias `%v` already exists\n", aliasFlag)
-			returnCwd()
+			utilities.ReturnCwd()
 		}
-		r.StashRecords[targetPath] = records.StashRecord{Alias: aliasFlag, Timestamp: timeNow()}
+		r.StashRecords[targetPath] = records.StashRecord{Alias: aliasFlag, Timestamp: utilities.TimeNow()}
 	}
 
-	autoClear(&r, configs.MaxMRUDisplay)
+	utilities.AutoClear(&r, configs.MaxMRUDisplay)
 	strings.Replace(targetPath, " ", "\\ ", -1)
 	fmt.Print(targetPath)
 
 	output, _ := json.Marshal(r)
 	os.WriteFile(cachePath, output, 0644)
-}
-
-func returnCwd() {
-	fmt.Print(".")
-	os.Exit(0)
-}
-
-func dynamicPathSwap(swapArg string, upCount int) string {
-	paths := make([]string, 0)
-	for i := 0; i < upCount; i++ {
-		wd, _ := os.Getwd()
-		wdArr := strings.Split(wd, "/")
-		paths = prependStrSlice(paths, wdArr[len(wdArr)-1])
-		os.Chdir("..")
-	}
-
-	os.Chdir("..")
-	paths = prependStrSlice(paths, swapArg)
-	targetPath := strings.Join(paths, "/")
-
-	return targetPath
-}
-
-func prependStrSlice(x []string, y string) []string {
-	x = append(x, "")
-	copy(x[1:], x)
-	x[0] = y
-	return x
-}
-
-func isInvalidPath(targetPath string) bool {
-	err := os.Chdir(targetPath)
-	if err != nil {
-		log.Printf("path `%v` is not a valid path\n", targetPath)
-		return true
-	}
-
-	return false
-}
-
-func getParentDir(targetPath string) string {
-	parentPath := filepath.Dir(targetPath)
-	err := os.Chdir(parentPath)
-	if err != nil {
-		log.Printf("path `%v` is not a valid path\n", targetPath)
-		os.Exit(0)
-	}
-
-	// allow fallback to cwd if invalid path is provided
-	parentPath, _ = os.Getwd()
-	log.Printf("Falling back to parent directory %v\n", parentPath)
-	return parentPath
-}
-
-func repeat(str string, times int) string {
-	s := make([]string, times)
-	for i := range s {
-		s[i] = str
-	}
-
-	return strings.Join(s, "/")
-}
-
-func timeNow() string {
-	return time.Now().Format("2006-01-02 15:04:05 MST")
-}
-
-func autoClear(r *records.Records, limit int) {
-	rk := records.SortRecords(r.PathRecords)
-
-	if len(rk) > limit {
-		for i := limit; i < len(rk); i++ {
-			delete(r.PathRecords, rk[i])
-		}
-
-	}
 }

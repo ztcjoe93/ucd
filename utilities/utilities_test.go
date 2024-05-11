@@ -1,4 +1,4 @@
-package main
+package utilities
 
 import (
 	"os"
@@ -6,8 +6,8 @@ import (
 )
 
 func TestRepeatFn(t *testing.T) {
-	str1 := repeat("..", 4)
-	str2 := repeat(".", 2)
+	str1 := Repeat("..", 4)
+	str2 := Repeat(".", 2)
 
 	if str1 != "../../../.." {
 		t.Fatalf(`repeat fn does not create 4 sub-paths for str1`)
@@ -25,7 +25,7 @@ func TestIsInvalidPath(t *testing.T) {
 		t.Fatalf(`Path doanfkjzx/sdfj931/sdfkjal exists`)
 	}
 
-	val := isInvalidPath(invalidPath)
+	val := IsInvalidPath(invalidPath)
 
 	if val != true {
 		t.Fatalf(`InvalidPath returns true`)
